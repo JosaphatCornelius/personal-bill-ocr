@@ -1,5 +1,4 @@
 import io
-from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from PIL import Image
 
@@ -27,3 +26,32 @@ def get_pil_image_from_drive(service, file_id):
 
     # Convert binary bytes back into a stream for PIL to read
     return Image.open(io.BytesIO(image_bytes))
+
+
+def get_items_from_drive_folder(drive_service, folder_id):
+    items = []
+    page_token = None
+
+    query = f"'{folder_id}' in parents and trashed=false"
+
+    while True:
+        results = drive_service.files().list(
+            q=query,
+            spaces="drive",
+            fields="nextPageToken, files(id, name)",
+            pageToken=page_token,
+        ).execute()
+        items.extend(results.get("files", []))
+        page_token = results.get("nextPageToken", None)
+        if not page_token:
+            break
+
+    if not items:
+        print("No files found.")
+        return []
+
+    print("Found {} files.".format(len(items)))
+    for item in items:
+        print(item["name"])
+
+    return items

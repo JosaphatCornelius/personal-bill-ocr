@@ -3,3 +3,4 @@ protobuf~=7.36.2
 google-api-python-client~=2.201.0
 pillow~=12.3.0
 python-dotenv~=1.2.4
+paddlepaddle~=3.2.2

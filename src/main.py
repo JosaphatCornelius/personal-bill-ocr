@@ -31,6 +31,7 @@ def main():
 
     except HTTPError as error:
         print(f"HTTP error occurred: {error}")
+
     except Exception:
         traceback.print_exc()
 

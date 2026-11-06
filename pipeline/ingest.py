@@ -25,7 +25,7 @@ def get_pil_image_from_drive(service, file_id):
     image_bytes = get_image_bytes_from_drive(service, file_id)
 
     # Convert binary bytes back into a stream for PIL to read
-    return Image.open(io.BytesIO(image_bytes))
+    return Image.open(io.BytesIO(image_bytes)).convert("RGB")
 
 
 def get_items_from_drive_folder(drive_service, folder_id):

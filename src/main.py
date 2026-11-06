@@ -1,14 +1,16 @@
 import os
 import json
+import traceback
+from pipeline.ocr import text_extraction
 from urllib.error import HTTPError
-from pipeline.ocr import ocr
-from pipeline.ingest import get_pil_image_from_drive, get_items_from_drive_folder
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
+from pipeline.ingest import load_images
 from dotenv import load_dotenv
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
 load_dotenv(verbose=True)
+
 
 def main():
     folder_id = os.getenv("GDRIVE_FOLDER_ID")
@@ -19,20 +21,20 @@ def main():
     drive_service = build("drive", "v3", credentials=credentials)
 
     try:
-        images = get_items_from_drive_folder(drive_service, folder_id)
-        for img in images:
-            bill_image = get_pil_image_from_drive(drive_service, img["id"])
-            result = ocr(bill_image)
-            print(result)
+        images = load_images(drive_service, folder_id)
+        results = text_extraction(images)
+
+        for name, lines in results.items():
+            print(f"--- {name} ---")
+            for line in lines:
+                print(f"{line['text']} ({line['confidence']:.2f})")
 
     except HTTPError as error:
-        print(f"An error occurred: {error}")
-        return None
+        print(f"HTTP error occurred: {error}")
 
-    except Exception as error:
-        print(f"An error occurred: {error}")
-        return None
+    except Exception:
+        traceback.print_exc()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

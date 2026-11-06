@@ -55,3 +55,14 @@ def get_items_from_drive_folder(drive_service, folder_id):
         print(item["name"])
 
     return items
+
+def load_images(drive_service, folder_id):
+    items = get_items_from_drive_folder(drive_service, folder_id)
+    images = []
+    for item in items:
+        try:
+            pil_image = get_pil_image_from_drive(drive_service, item["id"])
+            images.append({"name": item["name"], "image": pil_image})
+        except Exception as error:
+            print(f"Skipping {item['name']}: failed to load ({error})")
+    return images

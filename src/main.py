@@ -1,12 +1,11 @@
 import os
 import json
 import traceback
-import numpy as np
+from pipeline.ocr import text_extraction
 from urllib.error import HTTPError
-from pipeline.ingest import get_pil_image_from_drive, get_items_from_drive_folder
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
-from paddleocr import PaddleOCR
+from pipeline.ingest import load_images
 from dotenv import load_dotenv
 
 SCOPES = ["https://www.googleapis.com/auth/drive"]
@@ -21,35 +20,19 @@ def main():
     )
     drive_service = build("drive", "v3", credentials=credentials)
 
-    pipeline = PaddleOCR(use_textline_orientation=True, lang="id")
-
     try:
-        images = get_items_from_drive_folder(drive_service, folder_id)
-        for img in images:
-            bill_image = get_pil_image_from_drive(drive_service, img["id"])
-            img_np = np.array(bill_image)
-            ocr_result = pipeline.predict(img_np)
+        images = load_images(drive_service, folder_id)
+        results = text_extraction(images)
 
-            if not ocr_result:
-                print(f"Skipping {img['name']}: no result returned.")
-                continue
-
-            for res in ocr_result:
-                texts = res["rec_texts"]
-                scores = res["rec_scores"]
-
-                if not texts:
-                    print(f"Skipping {img['name']}: no text detected.")
-                    continue
-
-                print(f"--- {img['name']} ---")
-                for text, confidence in zip(texts, scores):
-                    print(f"Detected text: {text} ({confidence:.2f})")
+        for name, lines in results.items():
+            print(f"--- {name} ---")
+            for line in lines:
+                print(f"{line['text']} ({line['confidence']:.2f})")
 
     except HTTPError as error:
         print(f"HTTP error occurred: {error}")
     except Exception:
-        traceback.print_exc()  # shows the real line instead of just the message
+        traceback.print_exc()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-# bill-ocr-pipeline
+# personal-bill-ocr
 
 Build Status: In Development
 
@@ -9,7 +9,7 @@ This repository is a pipeline that reads photos of bills and receipts from a Goo
 * **OCR:** [PaddleOCR 3.2.2]
 * **Ingestion:** [Google Drive API, Pillow]
 * **Language:** [Python]
-* **Planned:** [Firefly III]
+* **Target:** [Firefly III]
 
 ## Current Status
 
@@ -25,25 +25,20 @@ Right now the pipeline only prints the detected text and its confidence score. N
 
 ## Quick Start
 
-Instructions to get the project running locally.
-
 ```bash
 # Clone the repository
-git clone https://github.com/JosaphatCornelius/bill-ocr-pipeline.git
-cd bill-ocr-pipeline
+git clone https://github.com/JosaphatCornelius/personal-bill-ocr.git
+cd personal-bill-ocr
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Copy the example files and fill in your own values
+cp .env.example .env
+cp config.example.yml config.yml
 ```
 
-Create a `.env` file in the project root:
-
-```
-GDRIVE_FOLDER_ID=your-folder-id
-GDRIVE_CREDENTIAL={"type": "service_account", ...}
-```
-
-*Note: `GDRIVE_CREDENTIAL` is the full service account JSON on a single line. The service account also needs access to the Drive folder you want to read. Never commit the `.env` file.*
+*Note: `GDRIVE_CREDENTIAL` is the full service account JSON on a single line. The service account also needs access to the Drive folder you want to read. Never commit `.env` or `config.yml`.*
 
 ## Usage
 
@@ -56,16 +51,13 @@ Every image in the Drive folder is downloaded and run through OCR, and the detec
 ## Project Structure
 
 ```
-main.py             # entry point
-pipeline/
-  ingest.py         # Google Drive download -> PIL images
-  ocr.py            # PaddleOCR text extraction
+TODO: paste the output of `tree -L 2 -I "__pycache__|.git"` here
 ```
 
 ## Roadmap
 
-* A `pipeline/parser.py` module for Indonesian receipt formats (e.g. `Rp 1.250.000`, `dd/mm/yyyy`)
-* A `pipeline/firefly.py` module that posts transactions through the Firefly III API
+* A parser module for Indonesian receipt formats (e.g. `Rp 1.250.000`, `dd/mm/yyyy`)
+* A Firefly III module that posts transactions through its API
 * A `--dry-run` mode that prints the transaction payload instead of posting it
 * `FIREFLY_URL` and `FIREFLY_TOKEN` environment variables for the integration
 
